@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { TodoService } from './todo.service'
-import { TodoRepository } from '@modules/todo/domain/repositories/TodoRepository'
-import { TodoEntity } from '@modules/todo/domain/entities/TodoEntity'
-import { NotFoundException } from '@nestjs/common'
+import {Test, TestingModule} from '@nestjs/testing'
+import {TodoService} from './todo.service'
+import {TodoRepository} from '@modules/todo/domain/repositories/TodoRepository'
+import {TodoEntity} from '@modules/todo/domain/entities/TodoEntity'
+import {NotFoundException} from '@nestjs/common'
 
 describe('TodoService', () => {
   let service: TodoService
@@ -43,7 +43,7 @@ describe('TodoService', () => {
 
     mockTodoRepository.saveTodo.mockResolvedValue(todoEntity)
 
-    const result = await service.createTodoForUser(1, { title: 'New Todo' })
+    const result = await service.createTodoForUser(1, {title: 'New Todo'})
 
     expect(result).toEqual({
       id: 1,
@@ -58,31 +58,53 @@ describe('TodoService', () => {
 
   it('should return todos for the user', async () => {
     const todos = [
-      { id: 1, title: 'A', userId: 1, listId: undefined, priority: 'low', completed: false },
+      {
+        id: 1,
+        title: 'A',
+        userId: 1,
+        listId: undefined,
+        priority: 'low',
+        completed: false,
+      },
     ]
     mockTodoRepository.findTodosByUser.mockResolvedValue(todos)
 
     const result = await service.getTodosForUser(1)
 
     expect(result).toEqual([
-      { id: 1, title: 'A', listId: undefined, priority: 'low', completed: false },
+      {id: 1, title: 'A', listId: undefined, priority: 'low', completed: false},
     ])
     expect(todoRepository.findTodosByUser).toHaveBeenCalledWith(1)
   })
 
   it('should get a todo by id for user', async () => {
-    const todo = { id: 2, title: 'Todo', userId: 1, listId: undefined, priority: 'medium', completed: false }
+    const todo = {
+      id: 2,
+      title: 'Todo',
+      userId: 1,
+      listId: undefined,
+      priority: 'medium',
+      completed: false,
+    }
     mockTodoRepository.findTodoByIdForUser.mockResolvedValue(todo)
 
     const result = await service.getTodoByIdForUser(1, 2)
 
-    expect(result).toEqual({ id: 2, title: 'Todo', listId: undefined, priority: 'medium', completed: false })
+    expect(result).toEqual({
+      id: 2,
+      title: 'Todo',
+      listId: undefined,
+      priority: 'medium',
+      completed: false,
+    })
   })
 
   it('should throw when requested todo is missing', async () => {
     mockTodoRepository.findTodoByIdForUser.mockResolvedValue(null)
 
-    await expect(service.getTodoByIdForUser(1, 99)).rejects.toThrow(NotFoundException)
+    await expect(service.getTodoByIdForUser(1, 99)).rejects.toThrow(
+      NotFoundException,
+    )
   })
 
   it('should update a todo for user', async () => {
@@ -95,7 +117,11 @@ describe('TodoService', () => {
     todo.userId = 1
 
     mockTodoRepository.findTodoByIdForUser.mockResolvedValue(todo)
-    mockTodoRepository.saveTodo.mockResolvedValue({ ...todo, title: 'Updated', completed: true })
+    mockTodoRepository.saveTodo.mockResolvedValue({
+      ...todo,
+      title: 'Updated',
+      completed: true,
+    })
 
     const result = await service.updateTodoForUser(1, 1, {
       title: 'Updated',
@@ -112,7 +138,7 @@ describe('TodoService', () => {
 
     const result = await service.deleteTodoForUser(1, 1)
 
-    expect(result).toEqual({ success: true })
+    expect(result).toEqual({success: true})
     expect(todoRepository.deleteTodoByIdForUser).toHaveBeenCalledWith(1, 1)
   })
 
@@ -158,12 +184,14 @@ describe('TodoService', () => {
 
     service.createList(1, 'Inbox')
     mockTodoRepository.findTodoByIdForUser.mockResolvedValue(todo)
-    mockTodoRepository.saveTodo.mockResolvedValue({ ...todo, listId: 1 })
+    mockTodoRepository.saveTodo.mockResolvedValue({...todo, listId: 1})
 
     const result = await service.addTodoToList(1, 1, 1)
 
     expect(result.listId).toBe(1)
-    expect(todoRepository.saveTodo).toHaveBeenCalledWith(expect.objectContaining({ listId: 1 }))
+    expect(todoRepository.saveTodo).toHaveBeenCalledWith(
+      expect.objectContaining({listId: 1}),
+    )
   })
 
   it('should reorder lists', () => {

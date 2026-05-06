@@ -14,6 +14,5 @@ export const loadAppConfig = (): IAppConfig => {
     },
   }
 
-
   return config
 }

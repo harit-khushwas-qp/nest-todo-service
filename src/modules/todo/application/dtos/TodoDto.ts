@@ -1,4 +1,11 @@
-import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator'
 
 export class TodoDto {
   @IsString()
@@ -21,4 +28,4 @@ export class TodoDto {
 
   @IsOptional()
   listId?: number
-}   
+}

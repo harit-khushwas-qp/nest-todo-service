@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { TodoModule } from './modules/todo/todo.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { loadAppConfig } from './config/loadAppConfig';
+import {Module} from '@nestjs/common'
+import {ConfigModule} from '@nestjs/config'
+import {TodoModule} from './modules/todo/todo.module'
+import {AuthModule} from './modules/auth/auth.module'
+import {loadAppConfig} from './config/loadAppConfig'
 
 @Module({
   imports: [

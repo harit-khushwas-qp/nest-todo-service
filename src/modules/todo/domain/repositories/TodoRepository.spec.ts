@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { TodoRepository } from './TodoRepository'
-import { TodoEntity } from '../entities/TodoEntity'
-import { Repository } from 'typeorm'
+import {Test, TestingModule} from '@nestjs/testing'
+import {TodoRepository} from './TodoRepository'
+import {TodoEntity} from '../entities/TodoEntity'
+import {Repository} from 'typeorm'
 
 describe('TodoRepository', () => {
   let repository: TodoRepository
@@ -35,7 +35,7 @@ describe('TodoRepository', () => {
       const todoEntity = new TodoEntity()
       todoEntity.title = 'Test Todo'
 
-      const savedEntity = { id: 1, title: todoEntity.title }
+      const savedEntity = {id: 1, title: todoEntity.title}
       mockTypeOrmRepository.save.mockResolvedValue(savedEntity)
 
       const result = await repository.saveTodo(todoEntity)
@@ -49,31 +49,35 @@ describe('TodoRepository', () => {
       todoEntity.title = 'Fails'
       mockTypeOrmRepository.save.mockRejectedValue(new Error('save failure'))
 
-      await expect(repository.saveTodo(todoEntity)).rejects.toThrow('save failure')
+      await expect(repository.saveTodo(todoEntity)).rejects.toThrow(
+        'save failure',
+      )
     })
   })
 
   describe('findTodosByUser', () => {
     it('should return todos for a specific user', async () => {
-      const todos = [{ id: 1, userId: 2 }]
+      const todos = [{id: 1, userId: 2}]
       mockTypeOrmRepository.find.mockResolvedValue(todos)
 
       const result = await repository.findTodosByUser(2)
 
       expect(result).toEqual(todos)
-      expect(typeOrmRepository.find).toHaveBeenCalledWith({ where: { userId: 2 } })
+      expect(typeOrmRepository.find).toHaveBeenCalledWith({where: {userId: 2}})
     })
   })
 
   describe('findTodoByIdForUser', () => {
     it('should return a todo for the correct user and id', async () => {
-      const todo = { id: 1, userId: 1 }
+      const todo = {id: 1, userId: 1}
       mockTypeOrmRepository.findOne.mockResolvedValue(todo)
 
       const result = await repository.findTodoByIdForUser(1, 1)
 
       expect(result).toEqual(todo)
-      expect(typeOrmRepository.findOne).toHaveBeenCalledWith({ where: { id: 1, userId: 1 } })
+      expect(typeOrmRepository.findOne).toHaveBeenCalledWith({
+        where: {id: 1, userId: 1},
+      })
     })
 
     it('should return null when no todo exists', async () => {
@@ -87,17 +91,21 @@ describe('TodoRepository', () => {
 
   describe('deleteTodoByIdForUser', () => {
     it('should delete a todo for the correct user and id', async () => {
-      mockTypeOrmRepository.delete.mockResolvedValue({ affected: 1 })
+      mockTypeOrmRepository.delete.mockResolvedValue({affected: 1})
 
       await repository.deleteTodoByIdForUser(1, 1)
 
-      expect(typeOrmRepository.delete).toHaveBeenCalledWith({ id: 1, userId: 1 })
+      expect(typeOrmRepository.delete).toHaveBeenCalledWith({id: 1, userId: 1})
     })
 
     it('should propagate delete errors', async () => {
-      mockTypeOrmRepository.delete.mockRejectedValue(new Error('delete failure'))
+      mockTypeOrmRepository.delete.mockRejectedValue(
+        new Error('delete failure'),
+      )
 
-      await expect(repository.deleteTodoByIdForUser(1, 1)).rejects.toThrow('delete failure')
+      await expect(repository.deleteTodoByIdForUser(1, 1)).rejects.toThrow(
+        'delete failure',
+      )
     })
   })
 })

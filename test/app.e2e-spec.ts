@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { INestApplication, HttpStatus } from '@nestjs/common'
+import {Test, TestingModule} from '@nestjs/testing'
+import {INestApplication, HttpStatus} from '@nestjs/common'
 import request from 'supertest'
-import { App } from 'supertest/types'
-import { AppModule } from './../src/app.module'
+import {App} from 'supertest/types'
+import {AppModule} from './../src/app.module'
 
 describe('App E2E Tests', () => {
   let app: INestApplication<App>
@@ -39,7 +39,7 @@ describe('App E2E Tests', () => {
   describe('TodoController - POST /todos', () => {
     it('should create a new todo', async () => {
       const todoData = {
-        title: 'Test Todo Item'
+        title: 'Test Todo Item',
       }
 
       const response = await request(app.getHttpServer())
@@ -74,8 +74,7 @@ describe('App E2E Tests', () => {
     })
 
     it('should reject missing title field', async () => {
-      const todoData = {
-      }
+      const todoData = {}
 
       await request(app.getHttpServer())
         .post('/todos')
@@ -110,7 +109,7 @@ describe('App E2E Tests', () => {
   describe('Integration Tests', () => {
     it('should create and retrieve a todo', async () => {
       const todoData = {
-        title: 'Integration Test Todo'
+        title: 'Integration Test Todo',
       }
 
       const createResponse = await request(app.getHttpServer())
@@ -129,11 +128,7 @@ describe('App E2E Tests', () => {
     })
 
     it('should handle multiple todo creation', async () => {
-      const todos = [
-        { title: 'Todo 1' },
-        { title: 'Todo 2'},
-        { title: 'Todo 3'},
-      ]
+      const todos = [{title: 'Todo 1'}, {title: 'Todo 2'}, {title: 'Todo 3'}]
 
       for (const todoData of todos) {
         await request(app.getHttpServer())
@@ -151,15 +146,16 @@ describe('App E2E Tests', () => {
         .send('invalid json')
         .set('Content-Type', 'application/json')
 
-      expect([HttpStatus.BAD_REQUEST, HttpStatus.UNPROCESSABLE_ENTITY]).toContain(
-        response.status,
-      )
+      expect([
+        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      ]).toContain(response.status)
     })
 
     it('should handle missing Content-Type header', async () => {
       const response = await request(app.getHttpServer())
         .post('/todos')
-        .send({ title: 'Test' })
+        .send({title: 'Test'})
         .unset('Content-Type')
 
       // Should still work with default or return appropriate error

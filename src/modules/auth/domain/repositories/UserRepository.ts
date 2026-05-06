@@ -1,6 +1,6 @@
-import { DataSource, Repository } from 'typeorm'
-import { UserEntity } from '../entities/UserEntity'
-import { Inject, Injectable } from '@nestjs/common'
+import {DataSource, Repository} from 'typeorm'
+import {UserEntity} from '../entities/UserEntity'
+import {Inject, Injectable} from '@nestjs/common'
 
 export const userRepositoryProvider = [
   {
@@ -19,11 +19,11 @@ export class UserRepository {
   ) {}
 
   async findByUsername(username: string): Promise<UserEntity | null> {
-    return this.userRepository.findOne({ where: { username } })
+    return this.userRepository.findOne({where: {username}})
   }
 
   async findById(id: number): Promise<UserEntity | null> {
-    return this.userRepository.findOne({ where: { id } })
+    return this.userRepository.findOne({where: {id}})
   }
 
   async save(user: UserEntity): Promise<UserEntity> {

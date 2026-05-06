@@ -1,11 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { AuthService } from './auth.service'
-import { UserRepository } from '../../domain/repositories/UserRepository'
-import { UnauthorizedException } from '@nestjs/common'
+import {Test, TestingModule} from '@nestjs/testing'
+import {UnauthorizedException} from '@nestjs/common'
+
+import {AuthService} from './auth.service'
+import {UserRepository} from '../../domain/repositories/UserRepository'
 
 describe('AuthService', () => {
   let service: AuthService
-  let userRepository: UserRepository
 
   const mockUserRepository = {
     findByUsername: jest.fn(),
@@ -25,7 +25,7 @@ describe('AuthService', () => {
     }).compile()
 
     service = module.get<AuthService>(AuthService)
-    userRepository = module.get<UserRepository>(UserRepository)
+
     jest.clearAllMocks()
   })
 
@@ -43,6 +43,7 @@ describe('AuthService', () => {
     })
 
     expect(result).toHaveProperty('accessToken')
+
     expect(result.user).toEqual({
       id: 1,
       username: 'admin',
@@ -54,7 +55,10 @@ describe('AuthService', () => {
     mockUserRepository.findByUsername.mockResolvedValue(null)
 
     await expect(
-      service.login({ username: 'bad', password: 'bad' }),
+      service.login({
+        username: 'bad',
+        password: 'bad',
+      }),
     ).rejects.toThrow(UnauthorizedException)
   })
 
@@ -67,7 +71,10 @@ describe('AuthService', () => {
     })
 
     await expect(
-      service.login({ username: 'admin', password: 'wrong' }),
+      service.login({
+        username: 'admin',
+        password: 'wrong',
+      }),
     ).rejects.toThrow(UnauthorizedException)
   })
 
@@ -79,7 +86,7 @@ describe('AuthService', () => {
       name: 'Administrator',
     })
 
-    const { accessToken } = await service.login({
+    const {accessToken} = await service.login({
       username: 'admin',
       password: 'password123',
     })
@@ -95,16 +102,21 @@ describe('AuthService', () => {
     })
   })
 
-  it('should blacklist a token on logout', async () => {
+  it('should blacklist a token on logout', () => {
     const token = 'test-token'
+
     const logoutResponse = service.logout(token)
 
-    expect(logoutResponse).toEqual({ message: 'Successfully logged out' })
+    expect(logoutResponse).toEqual({
+      message: 'Successfully logged out',
+    })
+
     expect(() => service.verifyToken(token)).toThrow(UnauthorizedException)
   })
 
   it('should save default users when missing', async () => {
     mockUserRepository.findByUsername.mockResolvedValue(null)
+
     mockUserRepository.save.mockResolvedValue({
       id: 1,
       username: 'admin',

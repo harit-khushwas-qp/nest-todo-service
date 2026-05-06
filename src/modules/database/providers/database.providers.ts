@@ -4,7 +4,7 @@ import {IAppConfig} from '@src/config/IAppConfig'
 
 export const databaseProviders = [
   {
-    provide: "DATA_SOURCE",
+    provide: 'DATA_SOURCE',
     useFactory: async (configService: ConfigService): Promise<DataSource> => {
       const databaseConfig =
         configService.get<IAppConfig['database']>('database')
@@ -27,4 +27,3 @@ export const databaseProviders = [
     inject: [ConfigService],
   },
 ]
-

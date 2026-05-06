@@ -1,9 +1,9 @@
-import { Injectable, OnModuleInit, UnauthorizedException } from '@nestjs/common'
+import {Injectable, OnModuleInit, UnauthorizedException} from '@nestjs/common'
 import * as jwt from 'jsonwebtoken'
-import { LoginDto } from '../dtos/LoginDto'
-import { User } from '../types/User'
-import { UserRepository } from '../../domain/repositories/UserRepository'
-import { UserEntity } from '../../domain/entities/UserEntity'
+import {LoginDto} from '../dtos/LoginDto'
+import {IUser} from '../types/User'
+import {UserRepository} from '../../domain/repositories/UserRepository'
+import {UserEntity} from '../../domain/entities/UserEntity'
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'default_jwt_secret'
 const JWT_EXPIRATION = '2h'
@@ -14,12 +14,12 @@ export class AuthService implements OnModuleInit {
 
   constructor(private readonly userRepository: UserRepository) {}
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     await this.ensureDefaultUsers()
   }
 
-  async ensureDefaultUsers() {
-    const defaultUsers: User[] = [
+  async ensureDefaultUsers(): Promise<void> {
+    const defaultUsers: IUser[] = [
       {
         id: 1,
         username: 'admin',
@@ -35,7 +35,9 @@ export class AuthService implements OnModuleInit {
     ]
 
     for (const defaultUser of defaultUsers) {
-      const existingUser = await this.userRepository.findByUsername(defaultUser.username)
+      const existingUser = await this.userRepository.findByUsername(
+        defaultUser.username,
+      )
       if (!existingUser) {
         const userEntity = new UserEntity()
         userEntity.username = defaultUser.username
@@ -46,7 +48,10 @@ export class AuthService implements OnModuleInit {
     }
   }
 
-  async validateUser(username: string, password: string): Promise<User | null> {
+  async validateUser(
+    username: string,
+    password: string,
+  ): Promise<IUser | null> {
     const userEntity = await this.userRepository.findByUsername(username)
     if (!userEntity || userEntity.password !== password) {
       return null
@@ -60,7 +65,10 @@ export class AuthService implements OnModuleInit {
     }
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto): Promise<{
+    accessToken: string
+    user: {id: number; username: string; name: string}
+  }> {
     const user = await this.validateUser(loginDto.username, loginDto.password)
     if (!user) {
       throw new UnauthorizedException('Invalid username or password')
@@ -85,15 +93,17 @@ export class AuthService implements OnModuleInit {
     }
   }
 
-  logout(token: string) {
+  logout(token: string): {message: string} {
     if (!token) {
-      throw new UnauthorizedException('Authorization token is required for logout')
+      throw new UnauthorizedException(
+        'Authorization token is required for logout',
+      )
     }
     this.blacklistedTokens.add(token)
-    return { message: 'Successfully logged out' }
+    return {message: 'Successfully logged out'}
   }
 
-  verifyToken(token: string) {
+  verifyToken(token: string): {sub: number; username: string; name: string} {
     if (!token) {
       throw new UnauthorizedException('Authorization token not found')
     }
@@ -112,7 +122,7 @@ export class AuthService implements OnModuleInit {
         username: string
         name: string
       }
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired token')
     }
   }

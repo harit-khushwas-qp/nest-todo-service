@@ -1,6 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { AuthController } from './auth.controller'
-import { AuthService } from '../services/auth.service'
+import {Test, TestingModule} from '@nestjs/testing'
+import {AuthController} from './auth.controller'
+import {AuthService} from '../services/auth.service'
+import {IAuthenticatedRequest} from '@modules/todo/application/types/AuthenticatedRequest'
 
 describe('AuthController', () => {
   let controller: AuthController
@@ -27,7 +28,7 @@ describe('AuthController', () => {
   it('should login and return token payload', async () => {
     const expected = {
       accessToken: 'token',
-      user: { id: 1, username: 'admin', name: 'Administrator' },
+      user: {id: 1, username: 'admin', name: 'Administrator'},
     }
     mockAuthService.login.mockResolvedValue(expected)
 
@@ -44,11 +45,15 @@ describe('AuthController', () => {
   })
 
   it('should logout and return a success message', async () => {
-    mockAuthService.logout.mockResolvedValue({ message: 'Successfully logged out' })
+    mockAuthService.logout.mockResolvedValue({
+      message: 'Successfully logged out',
+    })
 
-    const result = await controller.logout({ headers: { authorization: 'Bearer token' } })
+    const result = await controller.logout({
+      headers: {authorization: 'Bearer token'},
+    } as IAuthenticatedRequest)
 
-    expect(result).toEqual({ message: 'Successfully logged out' })
+    expect(result).toEqual({message: 'Successfully logged out'})
     expect(mockAuthService.logout).toHaveBeenCalledWith('token')
   })
 })
