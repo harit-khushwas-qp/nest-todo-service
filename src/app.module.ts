@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { resolve } from 'path';
 import { TodoModule } from './modules/todo/todo.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { loadAppConfig } from './config/loadAppConfig';
 
 @Module({
@@ -13,9 +11,10 @@ import { loadAppConfig } from './config/loadAppConfig';
       envFilePath: `src/config/.env.development`,
       load: [loadAppConfig],
     }),
+    AuthModule,
     TodoModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

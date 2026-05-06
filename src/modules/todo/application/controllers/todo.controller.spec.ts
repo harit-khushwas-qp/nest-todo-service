@@ -2,18 +2,22 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { TodoController } from './todo.controller'
 import { TodoService } from '../services/todo.service'
 import { HttpException, HttpStatus } from '@nestjs/common'
+import { JwtAuthGuard } from '@modules/auth/application/guards/jwt-auth.guard'
 
 describe('TodoController', () => {
-  let controller: TodoController;
-  let service: TodoService;
+  let controller: TodoController
+  let service: TodoService
 
   const mockTodoService = {
-    createTodo: jest.fn(),
-    getTodoById: jest.fn(),
+    createTodoForUser: jest.fn(),
+    getTodoByIdForUser: jest.fn(),
+    getTodosForUser: jest.fn(),
+    updateTodoForUser: jest.fn(),
+    deleteTodoForUser: jest.fn(),
   }
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const moduleBuilder = Test.createTestingModule({
       controllers: [TodoController],
       providers: [
         {
@@ -21,7 +25,12 @@ describe('TodoController', () => {
           useValue: mockTodoService,
         },
       ],
-    }).compile()
+    })
+
+    const module: TestingModule = await moduleBuilder
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile()
 
     controller = module.get<TodoController>(TodoController)
     service = module.get<TodoService>(TodoService)
@@ -29,103 +38,63 @@ describe('TodoController', () => {
     jest.clearAllMocks()
   })
 
-  describe('createTodo', () => {
-    it('should be defined', () => {
-      expect(controller).toBeDefined()
-    })
-
-    it('should create a todo successfully', async () => {
-      const todoDto = { title: 'Test Todo' }
-      const expectedResult = {
-        id: 1,
-        title: 'Test Todo'
-      }
-
-      mockTodoService.createTodo.mockResolvedValue(expectedResult)
-
-      const result = await controller.createTodo(todoDto)
-
-      expect(result).toEqual(expectedResult)
-      expect(service.createTodo).toHaveBeenCalledWith('Test Todo')
-    })
-
-    it('should throw BAD_REQUEST for empty title', async () => {
-      const todoDto = { title: ''}
-
-      mockTodoService.createTodo.mockRejectedValue(
-        new HttpException('Title cannot be empty', HttpStatus.BAD_REQUEST),
-      )
-
-      await expect(controller.createTodo(todoDto)).rejects.toThrow(
-        HttpException,
-      )
-    })
-
-    it('should throw BAD_REQUEST for whitespace-only title', async () => {
-      const todoDto = { title: '   '}
-
-      mockTodoService.createTodo.mockRejectedValue(
-        new HttpException('Title cannot be empty', HttpStatus.BAD_REQUEST),
-      )
-
-      await expect(controller.createTodo(todoDto)).rejects.toThrow(
-        HttpException,
-      )
-    })
-
-    it('should handle service errors', async () => {
-      const todoDto = { title: 'Test'}
-
-      mockTodoService.createTodo.mockRejectedValue(
-        new Error('Database error'),
-      )
-
-      await expect(controller.createTodo(todoDto)).rejects.toThrow(
-        HttpException,
-      )
-    })
-
+  it('should be defined', () => {
+    expect(controller).toBeDefined()
   })
 
-  describe('getTodo', () => {
-    it('should retrieve a todo by id', async () => {
-      const expectedResult = {
-        id: 1,
-        title: 'Test Todo'
-      }
+  it('should return todos for the authenticated user', async () => {
+    const todos = [{ id: 1, title: 'Test', completed: false }]
+    mockTodoService.getTodosForUser.mockResolvedValue(todos)
 
-      mockTodoService.getTodoById.mockResolvedValue(expectedResult)
+    const result = await controller.getTodos({ user: { userId: 1 } })
 
-      const result = await controller.getTodo(1)
+    expect(result).toEqual(todos)
+    expect(service.getTodosForUser).toHaveBeenCalledWith(1)
+  })
 
-      expect(result).toEqual(expectedResult)
-      expect(service.getTodoById).toHaveBeenCalledWith(1)
-    })
+  it('should create a todo successfully', async () => {
+    const todoDto = { title: 'Test Todo' }
+    const expectedResult = { id: 1, title: 'Test Todo' }
 
-    it('should throw NOT_FOUND when todo not found', async () => {
-      mockTodoService.getTodoById.mockResolvedValue(null)
+    mockTodoService.createTodoForUser.mockResolvedValue(expectedResult)
 
-      await expect(controller.getTodo(999)).rejects.toThrow(HttpException)
-    })
+    const result = await controller.createTodo({ user: { userId: 1 } }, todoDto)
 
-    it('should handle service errors', async () => {
-      mockTodoService.getTodoById.mockRejectedValue(new Error('Database error'))
+    expect(result).toEqual(expectedResult)
+    expect(service.createTodoForUser).toHaveBeenCalledWith(1, todoDto)
+  })
 
-      await expect(controller.getTodo(1)).rejects.toThrow(HttpException)
-    })
+  it('should update a todo successfully', async () => {
+    const updateDto = { title: 'Updated' }
+    const expectedResult = { id: 1, title: 'Updated' }
 
-    it('should accept numeric id parameter', async () => {
-      const expectedResult = {
-        id: 5,
-        title: 'Test'
-      }
+    mockTodoService.updateTodoForUser.mockResolvedValue(expectedResult)
 
-      mockTodoService.getTodoById.mockResolvedValue(expectedResult)
+    const result = await controller.updateTodo({ user: { userId: 1 } }, 1, updateDto)
 
-      const result = await controller.getTodo(5)
+    expect(result).toEqual(expectedResult)
+    expect(service.updateTodoForUser).toHaveBeenCalledWith(1, 1, updateDto)
+  })
 
-      expect(result).toEqual(expectedResult)
-      expect(service.getTodoById).toHaveBeenCalledWith(5)
-    })
+  it('should delete a todo successfully', async () => {
+    mockTodoService.deleteTodoForUser.mockResolvedValue({ success: true })
+
+    const result = await controller.deleteTodo({ user: { userId: 1 } }, 1)
+
+    expect(result).toEqual({ success: true })
+    expect(service.deleteTodoForUser).toHaveBeenCalledWith(1, 1)
+  })
+
+  it('should throw if service fails while creating', async () => {
+    const todoDto = { title: 'Test' }
+    mockTodoService.createTodoForUser.mockRejectedValue(new Error('Database error'))
+
+    await expect(controller.createTodo({ userId: 1 }, todoDto)).rejects.toThrow(HttpException)
+  })
+
+  it('should throw if service fails while retrieving a todo', async () => {
+    mockTodoService.getTodoByIdForUser.mockRejectedValue(new Error('Database error'))
+
+    await expect(controller.getTodo({ userId: 1 }, 1)).rejects.toThrow(HttpException)
   })
 })

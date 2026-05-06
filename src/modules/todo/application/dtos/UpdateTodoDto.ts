@@ -1,10 +1,10 @@
-import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
+import { IsBoolean, IsEnum, IsOptional, IsString, MaxLength } from 'class-validator'
 
-export class TodoDto {
+export class UpdateTodoDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(256)
-  title!: string
+  title?: string
 
   @IsOptional()
   @IsString()
@@ -21,4 +21,4 @@ export class TodoDto {
 
   @IsOptional()
   listId?: number
-}   
+}

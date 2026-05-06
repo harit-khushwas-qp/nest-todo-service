@@ -1,6 +1,6 @@
-import {DataSource, Repository} from 'typeorm'
-import {TodoEntity} from '../entities/TodoEntity'
-import {Inject, Injectable} from '@nestjs/common'
+import { DataSource, Repository } from 'typeorm'
+import { TodoEntity } from '../entities/TodoEntity'
+import { Inject, Injectable } from '@nestjs/common'
 
 export const todoRepositoryProvider = [
   {
@@ -18,11 +18,19 @@ export class TodoRepository {
     private todoRepository: Repository<TodoEntity>,
   ) {}
 
-  async createTodo(todoEntity: TodoEntity): Promise<TodoEntity> {
+  async saveTodo(todoEntity: TodoEntity): Promise<TodoEntity> {
     return this.todoRepository.save(todoEntity)
   }
 
-  async getTodoById(id: number): Promise<TodoEntity | null> {
-    return this.todoRepository.findOne({where: {id}})
+  async findTodosByUser(userId: number): Promise<TodoEntity[]> {
+    return this.todoRepository.find({ where: { userId } })
+  }
+
+  async findTodoByIdForUser(userId: number, id: number): Promise<TodoEntity | null> {
+    return this.todoRepository.findOne({ where: { id, userId } })
+  }
+
+  async deleteTodoByIdForUser(userId: number, id: number): Promise<void> {
+    await this.todoRepository.delete({ id, userId })
   }
 }
