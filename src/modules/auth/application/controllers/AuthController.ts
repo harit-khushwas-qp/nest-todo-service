@@ -8,6 +8,7 @@ import {
 } from '@nestjs/swagger'
 import {AuthService} from '../services/AuthService'
 import {LoginDto} from '../dtos/LoginDto'
+import {LoginResponseDto} from '../dtos/LoginResponseDto'
 import {JwtAuthGuard} from '@src/common/guards/JwtAuthGuard'
 import {BearerToken} from '@src/common/decorators/BearerToken'
 
@@ -22,10 +23,7 @@ export class AuthController {
     description: 'Authenticate user and return JWT token',
   })
   @ApiBody({type: LoginDto})
-  async login(@Body() loginDto: LoginDto): Promise<{
-    accessToken: string
-    user: {id: number; username: string; name: string}
-  }> {
+  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.login(loginDto)
   }
 

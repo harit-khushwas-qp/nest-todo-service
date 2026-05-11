@@ -19,11 +19,11 @@ import {
 } from '@nestjs/swagger'
 import {TodoDto} from '../dtos/TodoDto'
 import {UpdateTodoDto} from '../dtos/UpdateTodoDto'
-import {ITodo} from '../types/ITodo'
+import {TodoResponseDto} from '../dtos/TodoResponseDto'
 import {TodoService} from '../services/TodoService'
 import {JwtAuthGuard} from '@src/common/guards/JwtAuthGuard'
 import {CurrentUser} from '@src/common/decorators/CurrentUser'
-import {AuthenticatedUser} from '@modules/auth/application/types/AuthenticatedUser'
+import {AuthenticatedUserDto} from '@modules/auth/application/dtos/AuthenticatedUserDto'
 
 @ApiTags('todos')
 @ApiBearerAuth('access-token')
@@ -37,7 +37,9 @@ export class TodoController {
     summary: 'Get all todos',
     description: 'Retrieve all todos for the authenticated user',
   })
-  async getTodos(@CurrentUser() user: AuthenticatedUser): Promise<ITodo[]> {
+  async getTodos(
+    @CurrentUser() user: AuthenticatedUserDto,
+  ): Promise<TodoResponseDto[]> {
     return this.todoService.getTodosForUser(user.userId)
   }
 
@@ -48,9 +50,9 @@ export class TodoController {
   })
   @ApiParam({name: 'id', type: Number, description: 'Todo ID'})
   async getTodo(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() user: AuthenticatedUserDto,
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ITodo> {
+  ): Promise<TodoResponseDto> {
     return this.todoService.getTodoByIdForUser(user.userId, id)
   }
 
@@ -58,9 +60,9 @@ export class TodoController {
   @ApiOperation({summary: 'Create todo', description: 'Create a new todo item'})
   @ApiBody({type: TodoDto})
   async createTodo(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() user: AuthenticatedUserDto,
     @Body() todoDto: TodoDto,
-  ): Promise<ITodo> {
+  ): Promise<TodoResponseDto> {
     return this.todoService.createTodoForUser(user.userId, todoDto)
   }
 
@@ -72,10 +74,10 @@ export class TodoController {
   @ApiParam({name: 'id', type: Number, description: 'Todo ID'})
   @ApiBody({type: UpdateTodoDto})
   async updateTodo(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() user: AuthenticatedUserDto,
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: UpdateTodoDto,
-  ): Promise<ITodo> {
+  ): Promise<TodoResponseDto> {
     return this.todoService.updateTodoForUser(user.userId, id, updateDto)
   }
 
@@ -83,7 +85,7 @@ export class TodoController {
   @ApiOperation({summary: 'Delete todo', description: 'Delete a todo item'})
   @ApiParam({name: 'id', type: Number, description: 'Todo ID'})
   async deleteTodo(
-    @CurrentUser() user: AuthenticatedUser,
+    @CurrentUser() user: AuthenticatedUserDto,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<{success: boolean}> {
     return this.todoService.deleteTodoForUser(user.userId, id)

@@ -1,11 +1,14 @@
 import {AuthService} from '@modules/auth/application/services/AuthService'
-import {AuthenticatedRequest} from '@modules/auth/application/types/AuthenticatedRequest'
+import {AuthenticatedUserDto} from '@modules/auth/application/dtos/AuthenticatedUserDto'
 import {
   CanActivate,
   ExecutionContext,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common'
+import {Request} from 'express'
+
+type AuthenticatedRequest = Request & {user: AuthenticatedUserDto}
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {

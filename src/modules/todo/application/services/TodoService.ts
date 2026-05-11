@@ -1,24 +1,30 @@
 import {Injectable, NotFoundException} from '@nestjs/common'
 import {TodoRepository} from '@modules/todo/domain/repositories/TodoRepository'
-import {ITodo} from '@modules/todo/application/types/ITodo'
 import {TodoDto} from '../dtos/TodoDto'
 import {UpdateTodoDto} from '../dtos/UpdateTodoDto'
+import {TodoResponseDto} from '../dtos/TodoResponseDto'
 import {TodoEntity} from '@modules/todo/domain/entities/TodoEntity'
 
 @Injectable()
 export class TodoService {
   constructor(private readonly todoRepository: TodoRepository) {}
 
-  async createTodo(title: string, _emphasized = false): Promise<ITodo> {
+  async createTodo(
+    title: string,
+    _emphasized = false,
+  ): Promise<TodoResponseDto> {
     return this.createTodoForUser(0, {title})
   }
 
-  async getTodoById(id: number): Promise<ITodo | undefined> {
+  async getTodoById(id: number): Promise<TodoResponseDto | undefined> {
     const todo = await this.todoRepository.findTodoByIdForUser(0, id)
     return todo ? this.toPublicTodo(todo) : undefined
   }
 
-  async createTodoForUser(userId: number, todoDto: TodoDto): Promise<ITodo> {
+  async createTodoForUser(
+    userId: number,
+    todoDto: TodoDto,
+  ): Promise<TodoResponseDto> {
     const todoEntity = new TodoEntity()
     todoEntity.title = todoDto.title
     todoEntity.description = todoDto.description
@@ -30,12 +36,15 @@ export class TodoService {
     return this.toPublicTodo(savedTodo)
   }
 
-  async getTodosForUser(userId: number): Promise<ITodo[]> {
+  async getTodosForUser(userId: number): Promise<TodoResponseDto[]> {
     const todoEntities = await this.todoRepository.findTodosByUser(userId)
     return todoEntities.map(todo => this.toPublicTodo(todo))
   }
 
-  async getTodoByIdForUser(userId: number, id: number): Promise<ITodo> {
+  async getTodoByIdForUser(
+    userId: number,
+    id: number,
+  ): Promise<TodoResponseDto> {
     const todo = await this.todoRepository.findTodoByIdForUser(userId, id)
     if (!todo) {
       throw new NotFoundException(`Todo with ID ${id} not found`)
@@ -47,7 +56,7 @@ export class TodoService {
     userId: number,
     id: number,
     updateDto: UpdateTodoDto,
-  ): Promise<ITodo> {
+  ): Promise<TodoResponseDto> {
     const todo = await this.todoRepository.findTodoByIdForUser(userId, id)
     if (!todo) {
       throw new NotFoundException(`Todo with ID ${id} not found`)
@@ -78,7 +87,7 @@ export class TodoService {
     return {success: true}
   }
 
-  private toPublicTodo(todo: TodoEntity): ITodo {
+  private toPublicTodo(todo: TodoEntity): TodoResponseDto {
     const {userId: _userId, ...publicTodo} = todo
     return publicTodo
   }

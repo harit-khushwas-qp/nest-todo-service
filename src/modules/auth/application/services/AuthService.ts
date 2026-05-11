@@ -1,7 +1,8 @@
 import {Injectable, OnModuleInit, UnauthorizedException} from '@nestjs/common'
 import * as jwt from 'jsonwebtoken'
 import {LoginDto} from '../dtos/LoginDto'
-import {IUser} from '../types/User'
+import {LoginResponseDto} from '../dtos/LoginResponseDto'
+import {UserDto} from '../dtos/UserDto'
 import {UserRepository} from '../../domain/repositories/UserRepository'
 import {UserEntity} from '../../domain/entities/UserEntity'
 
@@ -19,7 +20,7 @@ export class AuthService implements OnModuleInit {
   }
 
   async ensureDefaultUsers(): Promise<void> {
-    const defaultUsers: IUser[] = [
+    const defaultUsers: UserDto[] = [
       {
         id: 1,
         username: 'admin',
@@ -51,10 +52,10 @@ export class AuthService implements OnModuleInit {
   async validateUser(
     username: string,
     password: string,
-  ): Promise<IUser | null> {
+  ): Promise<UserDto | null> {
     const userEntity = await this.userRepository.findByUsername(username)
     if (!userEntity || userEntity.password !== password) {
-      return null;
+      return null
     }
 
     return {
@@ -65,10 +66,7 @@ export class AuthService implements OnModuleInit {
     }
   }
 
-  async login(loginDto: LoginDto): Promise<{
-    accessToken: string
-    user: {id: number; username: string; name: string}
-  }> {
+  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
     const user = await this.validateUser(loginDto.username, loginDto.password)
     if (!user) {
       throw new UnauthorizedException('Invalid username or password')
