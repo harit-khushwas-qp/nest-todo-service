@@ -6,16 +6,23 @@ describe('TodoModule (e2e)', () => {
   let accessToken: string
 
   const authHeader = (): string => `Bearer ${accessToken}`
+  const bearerToken = (token: string): string => `Bearer ${token}`
+
+  const loginAs = async (
+    username: string,
+    password: string,
+  ): Promise<string> => {
+    const response = await request(testApp.app.getHttpServer())
+      .post('/auth/login')
+      .send({username, password})
+      .expect(201)
+
+    return response.body.accessToken
+  }
 
   beforeEach(async () => {
     testApp = await testSetupUtil.startTestApp()
-
-    const response = await request(testApp.app.getHttpServer())
-      .post('/auth/login')
-      .send({username: 'admin', password: 'password123'})
-      .expect(201)
-
-    accessToken = response.body.accessToken
+    accessToken = await loginAs('admin', 'password123')
   })
 
   afterEach(async () => {
@@ -80,6 +87,38 @@ describe('TodoModule (e2e)', () => {
     await request(testApp.app.getHttpServer())
       .get(`/todos/${todoId}`)
       .set('Authorization', authHeader())
+      .expect(404)
+  })
+
+  test('should reject todo creation when title is missing', async () => {
+    const response = await request(testApp.app.getHttpServer())
+      .post('/todos')
+      .set('Authorization', authHeader())
+      .send({description: 'Title is required'})
+      .expect(400)
+
+    expect(response.body.statusCode).toBe(400)
+  })
+
+  test('should not expose one user todo to another user', async () => {
+    const adminTodo = await request(testApp.app.getHttpServer())
+      .post('/todos')
+      .set('Authorization', authHeader())
+      .send({title: 'Admin private todo'})
+      .expect(201)
+
+    const userToken = await loginAs('user', 'password')
+
+    const userTodos = await request(testApp.app.getHttpServer())
+      .get('/todos')
+      .set('Authorization', bearerToken(userToken))
+      .expect(200)
+
+    expect(userTodos.body).toEqual([])
+
+    await request(testApp.app.getHttpServer())
+      .get(`/todos/${adminTodo.body.id}`)
+      .set('Authorization', bearerToken(userToken))
       .expect(404)
   })
 })
