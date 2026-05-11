@@ -4,5 +4,4 @@ export interface ITodo {
   description?: string
   priority?: 'low' | 'medium' | 'high'
   completed?: boolean
-  listId?: number
 }

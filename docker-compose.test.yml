@@ -1,0 +1,27 @@
+services:
+  mysql-todo-test:
+    image: mysql:8.0
+    container_name: mysql-todo-test
+    ports:
+      - "3366:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpw
+      MYSQL_DATABASE: todoDb
+      MYSQL_USER: todoUser
+      MYSQL_PASSWORD: todoPwd
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "todoUser",
+          "-ptodoPwd",
+        ]
+      timeout: 10s
+      retries: 5
+      interval: 5s
+      start_period: 30s

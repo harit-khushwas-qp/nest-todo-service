@@ -19,6 +19,8 @@ export const databaseProviders = [
         password: databaseConfig.password,
         database: databaseConfig.databaseName,
         entities: [__dirname + '/../../**/*Entity{.ts,.js}'],
+        synchronize: process.env.ENVIRONMENT === 'test',
+        dropSchema: process.env.ENVIRONMENT === 'test',
       })
 
       const db = await dataSource.initialize()

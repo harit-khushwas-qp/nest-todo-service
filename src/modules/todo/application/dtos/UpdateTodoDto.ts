@@ -24,7 +24,4 @@ export class UpdateTodoDto {
   @IsOptional()
   @IsBoolean()
   completed?: boolean
-
-  @IsOptional()
-  listId?: number
 }

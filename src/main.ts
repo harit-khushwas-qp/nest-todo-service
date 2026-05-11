@@ -1,13 +1,15 @@
 import {NestFactory} from '@nestjs/core'
-import {AppModule} from './app.module'
+import {AppModule} from './AppModule'
 import {ValidationPipe} from '@nestjs/common'
 import {SwaggerModule, DocumentBuilder} from '@nestjs/swagger'
+import {GlobalExceptionFilter} from './common/filters/global-exception.filter'
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule)
 
   // Global pipes
   app.useGlobalPipes(new ValidationPipe())
+  app.useGlobalFilters(new GlobalExceptionFilter())
 
   // Swagger setup
   const config = new DocumentBuilder()

@@ -10,7 +10,7 @@ import {TodoEntity} from '@modules/todo/domain/entities/TodoEntity'
 
 @Entity({name: 'users'})
 export class UserEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({name: 'id'})
   id!: number
 
   @Column({
@@ -22,10 +22,20 @@ export class UserEntity {
   })
   username!: string
 
-  @Column({name: 'password', type: 'varchar', length: 256, nullable: false})
+  @Column({
+    name: 'password',
+    type: 'varchar',
+    length: 256,
+    nullable: false,
+  })
   password!: string
 
-  @Column({name: 'name', type: 'varchar', length: 128, nullable: false})
+  @Column({
+    name: 'name',
+    type: 'varchar',
+    length: 128,
+    nullable: false,
+  })
   name!: string
 
   @CreateDateColumn({name: 'created_at'})

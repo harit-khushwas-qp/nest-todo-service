@@ -1,6 +1,7 @@
 import {INestApplication, ValidationPipe} from '@nestjs/common'
 import {Test, TestingModule} from '@nestjs/testing'
-import {AppModule} from '@src/app.module'
+import {AppModule} from '@src/AppModule'
+import {DataSource} from 'typeorm'
 
 export interface ITestApp {
   app: INestApplication
@@ -22,7 +23,15 @@ const startTestApp = async (): Promise<ITestApp> => {
   }
 }
 
-const closeApp = async (testApp: ITestApp): Promise<void> => {
+const closeApp = async (testApp?: ITestApp): Promise<void> => {
+  if (!testApp) {
+    return
+  }
+
+  const dataSource = testApp.moduleRef.get<DataSource>('DATA_SOURCE')
+  if (dataSource.isInitialized) {
+    await dataSource.destroy()
+  }
   await testApp.app.close()
 }
 

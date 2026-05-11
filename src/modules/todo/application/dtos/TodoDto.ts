@@ -25,7 +25,4 @@ export class TodoDto {
   @IsOptional()
   @IsBoolean()
   completed?: boolean
-
-  @IsOptional()
-  listId?: number
 }

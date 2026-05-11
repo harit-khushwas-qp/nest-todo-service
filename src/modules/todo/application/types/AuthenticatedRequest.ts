@@ -1,9 +1,3 @@
-import {Request} from 'express'
+import {AuthenticatedRequest} from '@modules/auth/application/types/AuthenticatedRequest'
 
-export interface IAuthenticatedRequest extends Request {
-  user: {
-    userId: number
-    username: string
-    name: string
-  }
-}
+export type IAuthenticatedRequest = AuthenticatedRequest

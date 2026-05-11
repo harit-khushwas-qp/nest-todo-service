@@ -2,6 +2,17 @@ import {DataSource, Repository} from 'typeorm'
 import {TodoEntity} from '../entities/TodoEntity'
 import {Inject, Injectable} from '@nestjs/common'
 
+export const TODO_TABLE = 'todo'
+
+export const TODO_COLUMNS = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  priority: 'priority',
+  completed: 'completed',
+  userId: 'user_id',
+} as const
+
 export const todoRepositoryProvider = [
   {
     provide: 'TODO_REPOSITORY',

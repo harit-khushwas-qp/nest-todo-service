@@ -1,16 +1,12 @@
 import {Injectable, NotFoundException} from '@nestjs/common'
 import {TodoRepository} from '@modules/todo/domain/repositories/TodoRepository'
 import {ITodo} from '@modules/todo/application/types/ITodo'
-import {ITodoList} from '../types/ITodoList'
 import {TodoDto} from '../dtos/TodoDto'
 import {UpdateTodoDto} from '../dtos/UpdateTodoDto'
 import {TodoEntity} from '@modules/todo/domain/entities/TodoEntity'
 
 @Injectable()
 export class TodoService {
-  private readonly lists: ITodoList[] = []
-  private readonly listCounter = {value: 1}
-
   constructor(private readonly todoRepository: TodoRepository) {}
 
   async createTodo(title: string, _emphasized = false): Promise<ITodo> {
@@ -28,7 +24,6 @@ export class TodoService {
     todoEntity.description = todoDto.description
     todoEntity.priority = todoDto.priority ?? 'medium'
     todoEntity.completed = todoDto.completed ?? false
-    todoEntity.listId = todoDto.listId
     todoEntity.userId = userId
 
     const savedTodo = await this.todoRepository.saveTodo(todoEntity)
@@ -58,20 +53,17 @@ export class TodoService {
       throw new NotFoundException(`Todo with ID ${id} not found`)
     }
 
-    if (updateDto.title !== undefined) {
+    if (updateDto.title != null) {
       todo.title = updateDto.title
     }
-    if (updateDto.description !== undefined) {
+    if (updateDto.description != null) {
       todo.description = updateDto.description
     }
-    if (updateDto.priority !== undefined) {
+    if (updateDto.priority != null) {
       todo.priority = updateDto.priority
     }
-    if (updateDto.completed !== undefined) {
+    if (updateDto.completed != null) {
       todo.completed = updateDto.completed
-    }
-    if (updateDto.listId !== undefined) {
-      todo.listId = updateDto.listId
     }
 
     const updatedTodo = await this.todoRepository.saveTodo(todo)
@@ -84,65 +76,6 @@ export class TodoService {
   ): Promise<{success: boolean}> {
     await this.todoRepository.deleteTodoByIdForUser(userId, id)
     return {success: true}
-  }
-
-  createList(userId: number, name: string): ITodoList {
-    const newList: ITodoList = {
-      id: this.listCounter.value++,
-      name,
-      userId,
-      position: this.lists.length + 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
-    this.lists.push(newList)
-    return newList
-  }
-
-  getListsForUser(userId: number): ITodoList[] {
-    return this.lists
-      .filter(list => list.userId === userId)
-      .sort((a, b) => a.position - b.position)
-  }
-
-  getListByIdForUser(userId: number, id: number): ITodoList {
-    const list = this.lists.find(
-      item => item.id === id && item.userId === userId,
-    )
-    if (!list) {
-      throw new NotFoundException(`Todo list with ID ${id} not found`)
-    }
-    return list
-  }
-
-  async addTodoToList(
-    userId: number,
-    listId: number,
-    todoId: number,
-  ): Promise<ITodo> {
-    const list = this.getListByIdForUser(userId, listId)
-    const todo = await this.todoRepository.findTodoByIdForUser(userId, todoId)
-    if (!todo) {
-      throw new NotFoundException(`Todo with ID ${todoId} not found`)
-    }
-
-    todo.listId = list.id
-    const updatedTodo = await this.todoRepository.saveTodo(todo)
-    return this.toPublicTodo(updatedTodo)
-  }
-
-  sortLists(userId: number, listOrder: number[]): ITodoList[] {
-    const lists = this.getListsForUser(userId)
-    const orderedLists = listOrder.map((id, index) => {
-      const list = lists.find(item => item.id === id)
-      if (!list) {
-        throw new NotFoundException(`Todo list with ID ${id} not found`)
-      }
-      list.position = index + 1
-      list.updatedAt = new Date().toISOString()
-      return list
-    })
-    return orderedLists
   }
 
   private toPublicTodo(todo: TodoEntity): ITodo {

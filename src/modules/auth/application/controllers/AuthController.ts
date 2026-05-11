@@ -1,4 +1,4 @@
-import {Body, Controller, Post, Req, UseGuards} from '@nestjs/common'
+import {Body, Controller, Post, UseGuards} from '@nestjs/common'
 import {
   ApiTags,
   ApiOperation,
@@ -6,10 +6,10 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger'
-import {AuthService} from '../services/auth.service'
+import {AuthService} from '../services/AuthService'
 import {LoginDto} from '../dtos/LoginDto'
-import {IAuthenticatedRequest} from '@modules/todo/application/types/AuthenticatedRequest'
-import {JwtAuthGuard} from '../guards/jwt-auth.guard'
+import {JwtAuthGuard} from '@src/common/guards/JwtAuthGuard'
+import {BearerToken} from '@src/common/decorators/BearerToken'
 
 @ApiTags('auth')
 @Controller('auth')
@@ -22,12 +22,6 @@ export class AuthController {
     description: 'Authenticate user and return JWT token',
   })
   @ApiBody({type: LoginDto})
-  @ApiResponse({
-    status: 200,
-    description: 'Login successful, returns JWT token',
-  })
-  @ApiResponse({status: 401, description: 'Invalid credentials'})
-  @ApiResponse({status: 400, description: 'Bad request'})
   async login(@Body() loginDto: LoginDto): Promise<{
     accessToken: string
     user: {id: number; username: string; name: string}
@@ -42,13 +36,7 @@ export class AuthController {
     summary: 'User logout',
     description: 'Logout user and invalidate token',
   })
-  @ApiResponse({status: 200, description: 'Logout successful'})
-  @ApiResponse({status: 401, description: 'Unauthorized'})
-  async logout(
-    @Req() request: IAuthenticatedRequest,
-  ): Promise<{message: string}> {
-    const authHeader = request.headers?.authorization || ''
-    const token = authHeader.replace('Bearer ', '').trim()
+  async logout(@BearerToken() token: string): Promise<{message: string}> {
     return this.authService.logout(token)
   }
 }

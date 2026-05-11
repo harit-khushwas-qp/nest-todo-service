@@ -1,17 +1,26 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
+  "rootDir": "..",
   "testEnvironment": "node",
   "testRegex": ".e2e.ts",
+  "testRegex": ".e2e.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
+  "setupFilesAfterEnv": ["<rootDir>/test/setupTests.ts"],
+  "globalSetup": "<rootDir>/test/globalSetupTest.ts",
+  "globalTeardown": "<rootDir>/test/globalTeardownTest.ts",
   "moduleNameMapper": {
     "^@modules/(.*)$": "<rootDir>/../src/modules/$1",
     "^@modules$": "<rootDir>/../src/modules",
     "^@src/(.*)$": "<rootDir>/../src/$1",
     "^@src$": "<rootDir>/../src",
     "^@test/(.*)$": "<rootDir>/$1",
-    "^@test$": "<rootDir>"
+    "^@test$": "<rootDir>",
+    "^@src/(.*)$": ["<rootDir>/src/$1"],
+    "^@modules/(.*)$": ["<rootDir>/src/modules/$1"],
+    "^@test/(.*)$": ["<rootDir>/test/$1"],
+    "^@lib/http-infra-lib(|/.*)$": "<rootDir>/libs/http-infra-lib/src/$1"
   }
 }

@@ -11,23 +11,35 @@ import {UserEntity} from '@modules/auth/domain/entities/UserEntity'
   name: 'todo',
 })
 export class TodoEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({name: 'id'})
   id!: number
 
-  @Column({length: 256, type: 'varchar', nullable: false})
+  @Column({
+    name: 'title',
+    length: 256,
+    type: 'varchar',
+    nullable: false,
+  })
   title!: string
 
-  @Column({length: 1024, type: 'varchar', nullable: true})
+  @Column({
+    name: 'description',
+    length: 1024,
+    type: 'varchar',
+    nullable: true,
+  })
   description?: string
 
-  @Column({type: 'enum', enum: ['low', 'medium', 'high'], default: 'medium'})
+  @Column({
+    name: 'priority',
+    type: 'enum',
+    enum: ['low', 'medium', 'high'],
+    default: 'medium',
+  })
   priority!: 'low' | 'medium' | 'high'
 
-  @Column({type: 'boolean', default: false})
+  @Column({name: 'completed', type: 'boolean', default: false})
   completed!: boolean
-
-  @Column({name: 'list_id', type: 'int', nullable: true})
-  listId?: number
 
   @Column({name: 'user_id', type: 'int'})
   userId!: number

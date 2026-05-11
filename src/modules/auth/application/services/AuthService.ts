@@ -54,7 +54,7 @@ export class AuthService implements OnModuleInit {
   ): Promise<IUser | null> {
     const userEntity = await this.userRepository.findByUsername(username)
     if (!userEntity || userEntity.password !== password) {
-      return null
+      return null;
     }
 
     return {
